@@ -2,8 +2,10 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
+import Home exposing (view)
 import Html exposing (Html, a, div, footer, i, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href)
+import Time exposing (millisToPosix)
 import Url exposing (Url)
 
 
@@ -124,7 +126,7 @@ docView _ =
     template Home []
 
 
-header : Page -> Html Msg
+header : Page -> Html msg
 header page =
     nav [ classList [ ( "navbar", True ), ( "navbar-light", True ) ] ]
         [ div [ class "container" ]
@@ -156,7 +158,7 @@ header page =
         ]
 
 
-ftr : Html Msg
+ftr : Html msg
 ftr =
     footer []
         [ div [ class "container" ]
@@ -170,11 +172,37 @@ ftr =
         ]
 
 
-template : Page -> List (Html Msg) -> List (Html Msg)
+template : Page -> List (Html msg) -> List (Html msg)
 template page rest =
     List.append [ header page ] (List.append rest (List.singleton ftr))
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Conduit", body = template model.currentPage [] }
+    { title = "Conduit"
+    , body =
+        template model.currentPage
+            (Home.view
+                { currentFeed = Home.Personal
+                , articles =
+                    [ { slug = "my-slug"
+                      , title = "If we quantify the alarm, we can get to the FTP pixel through the online SSL interface!"
+                      , description = "Omnis perspiciatis qui quia commodi sequi modi. Nostrum quam aut cupiditate est facere omnis possimus. Tenetur similique nemo illo soluta molestias facere quo. Ipsam totam facilis delectus nihil quidem soluta vel est omnis."
+                      , body = "My body"
+                      , tagList = [ "tag" ]
+                      , createdAt = millisToPosix 0
+                      , updatedAt = millisToPosix 0
+                      , favorited = False
+                      , favoritesCount = 13
+                      , author =
+                            { username = "user"
+                            , bio = "bio"
+                            , image = "http://i.imgur.com/Qr71crq.jpg"
+                            , following = True
+                            }
+                      }
+                    ]
+                , tags = [ "programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails" ]
+                }
+            )
+    }
