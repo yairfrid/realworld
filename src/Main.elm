@@ -94,11 +94,6 @@ update msg model =
             ( { model | url = url }, Cmd.none )
 
 
-docView : Model -> List (Html Msg)
-docView _ =
-    template Home []
-
-
 route : Page -> String
 route page =
     case page of
@@ -122,30 +117,30 @@ route page =
 
 
 header : Page -> Html msg
-header page =
+header activePage =
     nav [ classList [ ( "navbar", True ), ( "navbar-light", True ) ] ]
         [ div [ class "container" ]
             [ a [ class "navbar-brand", href (route Home) ]
                 [ text "conduit" ]
             , ul [ classList [ ( "nav", True ), ( "navbar-nav", True ), ( "pull-xs-right", True ) ] ]
                 [ li [ class "nav-item" ]
-                    [ a [ classList [ ( "nav-link", True ), ( "active", page == Home ) ], href (route Home) ]
+                    [ a [ classList [ ( "nav-link", True ), ( "active", activePage == Home ) ], href (route Home) ]
                         [ text "Home" ]
                     ]
                 , li [ class "nav-item" ]
-                    [ a [ classList [ ( "nav-link", True ), ( "active", page == NewArticle ) ], href (route NewArticle) ]
+                    [ a [ classList [ ( "nav-link", True ), ( "active", activePage == NewArticle ) ], href (route NewArticle) ]
                         [ i [ class "ion-compose" ] [], text "\u{00A0}New Article" ]
                     ]
                 , li [ class "nav-item" ]
-                    [ a [ classList [ ( "nav-link", True ), ( "active", page == Settings ) ], href (route Settings) ]
+                    [ a [ classList [ ( "nav-link", True ), ( "active", activePage == Settings ) ], href (route Settings) ]
                         [ i [ class "ion-gear-a" ] [], text "\u{00A0}Settings" ]
                     ]
                 , li [ class "nav-item" ]
-                    [ a [ classList [ ( "nav-link", True ), ( "active", page == SignIn ) ], href (route SignIn) ]
+                    [ a [ classList [ ( "nav-link", True ), ( "active", activePage == SignIn ) ], href (route SignIn) ]
                         [ text "Sign in" ]
                     ]
                 , li [ class "nav-item" ]
-                    [ a [ classList [ ( "nav-link", True ), ( "active", page == SignUp ) ], href (route SignUp) ]
+                    [ a [ classList [ ( "nav-link", True ), ( "active", activePage == SignUp ) ], href (route SignUp) ]
                         [ text "Sign up" ]
                     ]
                 ]
@@ -167,12 +162,12 @@ ftr =
         ]
 
 
-template : Page -> List (Html msg) -> List (Html msg)
-template page rest =
-    List.append [ header page ] (List.append rest (List.singleton ftr))
+template : Page -> Html msg -> List (Html msg)
+template activePage pageContent =
+    [ header activePage, pageContent, ftr ]
 
 
-view : Model -> Browser.Document Msg
+view : Model -> Browser.Document msg
 view model =
     { title = "Conduit"
     , body =

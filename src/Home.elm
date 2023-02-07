@@ -2,11 +2,12 @@ module Home exposing (CurrentFeed(..), Model, Msg, view)
 
 import Html exposing (Html, a, button, div, h1, i, img, li, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
+import Html.Events exposing (onClick)
 import Types exposing (Article, Tag)
 
 
-type alias Msg =
-    ()
+type Msg
+    = TagClicked Tag
 
 
 type CurrentFeed
@@ -19,6 +20,21 @@ type alias Model =
     , articles : List Article
     , tags : List Tag
     }
+
+
+
+-- UPDATE
+
+
+update : Msg -> Model -> Model
+update msg _ =
+    case msg of
+        TagClicked _ ->
+            Debug.todo "implement TagClicked"
+
+
+
+-- VIEW
 
 
 banner : Html msg
@@ -73,12 +89,12 @@ articlePreviews model =
     List.map articlePreview model.articles
 
 
-tagList : List Tag -> List (Html msg)
+tagList : List Tag -> List (Html Msg)
 tagList tags =
-    List.map (\tag -> a [ href "", class "tag-pill tag-default" ] [ text tag ]) tags
+    List.map (\tag -> a [ href "", class "tag-pill tag-default", onClick (TagClicked tag) ] [ text tag ]) tags
 
 
-popularTags : Model -> Html msg
+popularTags : Model -> Html Msg
 popularTags model =
     div [ class "col-md-3" ]
         [ div [ class "sidebar" ]
@@ -88,9 +104,9 @@ popularTags model =
         ]
 
 
-view : Model -> List (Html msg)
+view : Model -> Html Msg
 view model =
-    [ div [ class "home-page" ]
+    div [ class "home-page" ]
         [ banner
         , div [ class "container page" ]
             [ div [ class "row" ]
@@ -100,4 +116,3 @@ view model =
                 ]
             ]
         ]
-    ]
