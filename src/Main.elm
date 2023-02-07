@@ -13,8 +13,8 @@ main : Program () Model Msg
 main =
     Browser.application
         { init = init
-        , subscriptions = subscriptions
         , update = update
+        , subscriptions = subscriptions
         , view = view
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
@@ -43,28 +43,6 @@ type Page
     | Settings
     | SignIn
     | SignUp
-
-
-route : Page -> String
-route page =
-    case page of
-        Home ->
-            "/#/"
-
-        NewArticle ->
-            "/#/editor"
-
-        Settings ->
-            "/#/settings"
-
-        SignIn ->
-            "/#/login"
-
-        SignUp ->
-            "/#/register"
-
-        Other ->
-            Debug.todo "branch 'Other' not implemented"
 
 
 routeUrl : Url -> Page
@@ -116,14 +94,31 @@ update msg model =
             ( { model | url = url }, Cmd.none )
 
 
-pageActive : Model -> Page -> Bool
-pageActive model page =
-    model.currentPage == page
-
-
 docView : Model -> List (Html Msg)
 docView _ =
     template Home []
+
+
+route : Page -> String
+route page =
+    case page of
+        Home ->
+            "/#/"
+
+        NewArticle ->
+            "/#/editor"
+
+        Settings ->
+            "/#/settings"
+
+        SignIn ->
+            "/#/login"
+
+        SignUp ->
+            "/#/register"
+
+        Other ->
+            Debug.todo "branch 'Other' not implemented"
 
 
 header : Page -> Html msg
