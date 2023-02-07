@@ -13,9 +13,9 @@ main : Program () Model Msg
 main =
     Browser.application
         { init = init
+        , subscriptions = subscriptions
         , update = update
         , view = view
-        , subscriptions = subscriptions
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }
