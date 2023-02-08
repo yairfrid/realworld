@@ -1,8 +1,9 @@
-module Home exposing (CurrentFeed(..), Model, Msg, view)
+module Home exposing (CurrentFeed(..), Model, Msg, init, update, view)
 
 import Html exposing (Html, a, button, div, h1, i, img, li, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
+import Time exposing (millisToPosix)
 import Types exposing (Article, Tag)
 
 
@@ -13,6 +14,31 @@ type Msg
 type CurrentFeed
     = Personal
     | Global
+
+
+init : Model
+init =
+    { currentFeed = Personal
+    , articles =
+        [ { slug = "my-slug"
+          , title = "If we quantify the alarm, we can get to the FTP pixel through the online SSL interface!"
+          , description = "Omnis perspiciatis qui quia commodi sequi modi. Nostrum quam aut cupiditate est facere omnis possimus. Tenetur similique nemo illo soluta molestias facere quo. Ipsam totam facilis delectus nihil quidem soluta vel est omnis."
+          , body = "My body"
+          , tagList = [ "tag" ]
+          , createdAt = millisToPosix 0
+          , updatedAt = millisToPosix 0
+          , favorited = False
+          , favoritesCount = 13
+          , author =
+                { username = "user"
+                , bio = "bio"
+                , image = "http://i.imgur.com/Qr71crq.jpg"
+                , following = True
+                }
+          }
+        ]
+    , tags = [ "programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails" ]
+    }
 
 
 type alias Model =
@@ -104,9 +130,9 @@ popularTags model =
         ]
 
 
-view : Model -> Html Msg
+view : Model -> List (Html Msg)
 view model =
-    div [ class "home-page" ]
+    [ div [ class "home-page" ]
         [ banner
         , div [ class "container page" ]
             [ div [ class "row" ]
@@ -116,3 +142,4 @@ view model =
                 ]
             ]
         ]
+    ]
