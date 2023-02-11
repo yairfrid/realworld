@@ -2,11 +2,13 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
-import Home exposing (update, view)
 import Html exposing (Html, a, div, footer, i, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href)
 import Page exposing (..)
+import Page.Home as Home
+import Page.Login as Login
 import Route exposing (..)
+import Session exposing (Session)
 import Url exposing (Url)
 
 
@@ -24,19 +26,24 @@ main =
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd msg )
 init _ url key =
-    ( changeRouteTo (Route.fromUrl url) (Redirect { key = key }), Cmd.none )
+    changeRouteTo (Route.fromUrl url) (Redirect { key = key })
 
 
-subscriptions : Model -> Sub msg
-subscriptions _ =
-    Sub.none
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model of
+        Redirect _ ->
+            Session.changes GotSession (toSession model)
+
+        _ ->
+            Sub.none
 
 
 type Model
     = Home Home.Model
     | NewArticle
     | Settings
-    | SignIn
+    | SignIn Login.Model
     | SignUp
     | NotFound Session
     | Redirect Session
@@ -46,16 +53,8 @@ type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | GotHomeMsg Home.Msg
-
-
-type alias Session =
-    { key : Nav.Key
-    }
-
-
-navKey : Session -> Nav.Key
-navKey session =
-    session.key
+    | GotSignInMsg Login.Msg
+    | GotSession Session
 
 
 toSession : Model -> Session
@@ -64,8 +63,8 @@ toSession model =
         Redirect session ->
             session
 
-        Home _ ->
-            Debug.todo "branch 'Home _' not implemented"
+        Home home ->
+            Home.toSession home
 
         NewArticle ->
             Debug.todo "branch 'NewArticle' not implemented"
@@ -73,8 +72,8 @@ toSession model =
         Settings ->
             Debug.todo "branch 'Settings' not implemented"
 
-        SignIn ->
-            Debug.todo "branch 'SignIn' not implemented"
+        SignIn signIn ->
+            Login.toSession signIn
 
         SignUp ->
             Debug.todo "branch 'SignUp' not implemented"
@@ -83,18 +82,24 @@ toSession model =
             session
 
 
-changeRouteTo : Maybe Route.Route -> Model -> Model
+changeRouteTo : Maybe Route.Route -> Model -> ( Model, Cmd msg )
 changeRouteTo route model =
     let
+        _ =
+            Debug.log "changeRouteTo" route
+
         session =
             toSession model
     in
     case route of
         Nothing ->
-            NotFound session
+            ( NotFound session, Cmd.none )
+
+        Just Route.Root ->
+            ( model, Route.replaceUrl (Session.navKey (toSession model)) Route.Home )
 
         Just Route.Home ->
-            Home Home.init
+            ( Home (Home.init (toSession model)), Cmd.none )
 
         Just Route.NewArticle ->
             Debug.todo "branch 'Just NewArticle' not implemented"
@@ -103,7 +108,7 @@ changeRouteTo route model =
             Debug.todo "branch 'Just Settings' not implemented"
 
         Just Route.SignIn ->
-            Debug.todo "branch 'Just SignIn' not implemented"
+            ( SignIn (Login.init (toSession model)), Cmd.none )
 
         Just Route.SignUp ->
             Debug.todo "branch 'Just SignUp' not implemented"
@@ -123,18 +128,32 @@ update msg model =
                             ( model, Cmd.none )
 
                         Just _ ->
-                            ( model, Nav.pushUrl (navKey (toSession model)) (Url.toString url) )
+                            ( model, Nav.pushUrl (Session.navKey (toSession model)) (Url.toString url) )
 
                 Browser.External href ->
                     ( model, Nav.load href )
 
         ( UrlChanged url, _ ) ->
-            ( changeRouteTo (Route.fromUrl url) model, Cmd.none )
+            changeRouteTo (Route.fromUrl url) model
+
+        ( GotSession session, Redirect _ ) ->
+            ( Redirect session
+            , Route.replaceUrl (Session.navKey session) Route.Home
+            )
 
         ( GotHomeMsg subMsg, Home home ) ->
             ( Home (Home.update subMsg home), Cmd.none )
 
+        ( GotSignInMsg subMsg, SignIn signIn ) ->
+            ( SignIn (Login.update subMsg signIn), Cmd.none )
+
         ( GotHomeMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( GotSignInMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( GotSession _, _ ) ->
             ( model, Cmd.none )
 
 
@@ -208,8 +227,8 @@ view model =
             Settings ->
                 Debug.todo "branch 'Settings' not implemented"
 
-            SignIn ->
-                Debug.todo "branch 'SignIn' not implemented"
+            SignIn m ->
+                template Page.SignIn (viewPage GotSignInMsg (Login.view m))
 
             SignUp ->
                 Debug.todo "branch 'SignUp' not implemented"
@@ -218,5 +237,5 @@ view model =
                 Debug.todo "branch 'NotFound _' not implemented"
 
             Redirect _ ->
-                Debug.todo "branch 'Redirect _' not implemented"
+                template Page.Other []
     }

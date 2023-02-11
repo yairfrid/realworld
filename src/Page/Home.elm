@@ -1,8 +1,9 @@
-module Home exposing (CurrentFeed(..), Model, Msg, init, update, view)
+module Page.Home exposing (CurrentFeed(..), Model, Msg, init, toSession, update, view)
 
 import Html exposing (Html, a, button, div, h1, i, img, li, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
+import Session exposing (Session)
 import Time exposing (millisToPosix)
 import Types exposing (Article, Tag)
 
@@ -16,9 +17,10 @@ type CurrentFeed
     | Global
 
 
-init : Model
-init =
-    { currentFeed = Personal
+init : Session -> Model
+init session =
+    { session = session
+    , currentFeed = Personal
     , articles =
         [ { slug = "my-slug"
           , title = "If we quantify the alarm, we can get to the FTP pixel through the online SSL interface!"
@@ -42,10 +44,16 @@ init =
 
 
 type alias Model =
-    { currentFeed : CurrentFeed
+    { session : Session
+    , currentFeed : CurrentFeed
     , articles : List Article
     , tags : List Tag
     }
+
+
+toSession : Model -> Session
+toSession model =
+    model.session
 
 
 
@@ -102,7 +110,9 @@ articlePreview article =
                 , text (String.fromInt article.favoritesCount)
                 ]
             ]
-        , a [ href "", class "preview-link" ]
+
+        -- TODO(yairfrid) move /article to a proper route
+        , a [ href ("#/article/" ++ article.slug), class "preview-link" ]
             [ h1 [] [ text article.title ]
             , p [] [ text article.description ]
             , span [] [ text "Read more..." ]
