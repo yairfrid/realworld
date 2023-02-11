@@ -6,7 +6,8 @@ import Html exposing (Html, a, div, footer, i, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href)
 import Page exposing (..)
 import Page.Home as Home
-import Page.Login as Login
+import Page.SignIn as SignIn
+import Page.SignUp as SignUp
 import Route exposing (..)
 import Session exposing (Session)
 import Url exposing (Url)
@@ -43,8 +44,8 @@ type Model
     = Home Home.Model
     | NewArticle
     | Settings
-    | SignIn Login.Model
-    | SignUp
+    | SignIn SignIn.Model
+    | SignUp SignUp.Model
     | NotFound Session
     | Redirect Session
 
@@ -53,7 +54,8 @@ type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | GotHomeMsg Home.Msg
-    | GotSignInMsg Login.Msg
+    | GotSignInMsg SignIn.Msg
+    | GotSignUpMsg SignUp.Msg
     | GotSession Session
 
 
@@ -73,10 +75,10 @@ toSession model =
             Debug.todo "branch 'Settings' not implemented"
 
         SignIn signIn ->
-            Login.toSession signIn
+            SignIn.toSession signIn
 
-        SignUp ->
-            Debug.todo "branch 'SignUp' not implemented"
+        SignUp signUp ->
+            SignUp.toSession signUp
 
         NotFound session ->
             session
@@ -108,10 +110,10 @@ changeRouteTo route model =
             Debug.todo "branch 'Just Settings' not implemented"
 
         Just Route.SignIn ->
-            ( SignIn (Login.init (toSession model)), Cmd.none )
+            ( SignIn (SignIn.init (toSession model)), Cmd.none )
 
         Just Route.SignUp ->
-            Debug.todo "branch 'Just SignUp' not implemented"
+            ( SignUp (SignUp.init (toSession model)), Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -145,12 +147,20 @@ update msg model =
             ( Home (Home.update subMsg home), Cmd.none )
 
         ( GotSignInMsg subMsg, SignIn signIn ) ->
-            ( SignIn (Login.update subMsg signIn), Cmd.none )
+            ( SignIn (SignIn.update subMsg signIn), Cmd.none )
 
+        ( GotSignUpMsg subMsg, SignUp signUp ) ->
+            ( SignUp (SignUp.update subMsg signUp), Cmd.none )
+
+        -- TODO(yairfrid) make impossible cases non-representable
+        -- Handle all incompatible cases
         ( GotHomeMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( GotSignInMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( GotSignUpMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( GotSession _, _ ) ->
@@ -228,10 +238,10 @@ view model =
                 Debug.todo "branch 'Settings' not implemented"
 
             SignIn m ->
-                template Page.SignIn (viewPage GotSignInMsg (Login.view m))
+                template Page.SignIn (viewPage GotSignInMsg (SignIn.view m))
 
-            SignUp ->
-                Debug.todo "branch 'SignUp' not implemented"
+            SignUp m ->
+                template Page.SignUp (viewPage GotSignUpMsg (SignUp.view m))
 
             NotFound _ ->
                 Debug.todo "branch 'NotFound _' not implemented"
